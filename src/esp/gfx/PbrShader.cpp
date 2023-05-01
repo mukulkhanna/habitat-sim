@@ -211,6 +211,7 @@ PbrShader::PbrShader(Flags originalFlags, unsigned int lightCount)
   baseColorUniform_ = uniformLocation("Material.baseColor");
   roughnessUniform_ = uniformLocation("Material.roughness");
   metallicUniform_ = uniformLocation("Material.metallic");
+  iorUniform_ = uniformLocation("Material.ior");
   emissiveColorUniform_ = uniformLocation("Material.emissiveColor");
 
   // lights
@@ -249,6 +250,7 @@ PbrShader::PbrShader(Flags originalFlags, unsigned int lightCount)
     setBaseColor(Magnum::Color4{0.7f});
     setRoughness(0.9f);
     setMetallic(0.1f);
+    setIndexOfRefraction(1.5);
     if (flags_ & Flag::NormalTexture) {
       setNormalTextureScale(1.0f);
     }
@@ -430,6 +432,13 @@ PbrShader& PbrShader::setRoughness(float roughness) {
 PbrShader& PbrShader::setMetallic(float metallic) {
   if (lightingIsEnabled()) {
     setUniform(metallicUniform_, metallic);
+  }
+  return *this;
+}
+
+PbrShader& PbrShader::setIndexOfRefraction(float ior) {
+  if (lightingIsEnabled()) {
+    setUniform(iorUniform_, ior);
   }
   return *this;
 }
