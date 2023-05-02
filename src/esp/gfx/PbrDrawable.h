@@ -54,14 +54,22 @@ class PbrDrawable : public Drawable {
     // ClearCoat layer
     float cc_ClearCoatFactor = 0.0f;
     Mn::GL::Texture2D* cc_ClearCoatTexture = nullptr;
+
+    // TODO: is this going to be needed?
+    Mn::Trade::MaterialTextureSwizzle cc_ClearCoatTexture_Swizzle =
+        Mn::Trade::MaterialTextureSwizzle::R;
     float cc_Roughness = 0.0f;
     Mn::GL::Texture2D* cc_RoughnessTexture = nullptr;
 
     // TODO: is this going to be needed?
-    Mn::Trade::MaterialTextureSwizzle cc_Roughness_Texture_Swizzle =
+    Mn::Trade::MaterialTextureSwizzle cc_RoughnessTexture_Swizzle =
         Mn::Trade::MaterialTextureSwizzle::G;
     float cc_NormalTextureScale = 1.0f;
     Mn::GL::Texture2D* cc_NormalTexture = nullptr;
+
+    // TODO: is this going to be needed?
+    Mn::Trade::MaterialTextureSwizzle cc_NormalTexture_Swizzle =
+        Mn::Trade::MaterialTextureSwizzle::RGB;
 
     ////////////////
     // KHR_materials_ior

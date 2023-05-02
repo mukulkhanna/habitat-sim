@@ -52,10 +52,16 @@ void PbrDrawable::setMaterialValuesInternal(
       materialData_->as<Mn::Trade::PbrMetallicRoughnessMaterialData>();
   flags_ = PbrShader::Flag::ObjectId;
 
+  std::string debugStr = "";
+
   matCache.baseColor = tmpMaterialData.baseColor();
   matCache.roughness = tmpMaterialData.roughness();
   matCache.metalness = tmpMaterialData.metalness();
   matCache.emissiveColor = tmpMaterialData.emissiveColor();
+
+  Cr::Utility::formatInto(debugStr, debugStr.size(),
+                          "Base color : [{},{}.{}] |", matCache.baseColor.r(),
+                          matCache.baseColor.g(), matCache.baseColor.b());
 
   if (materialData_->hasAttribute("metallicTexturePointer") &&
       materialData_->hasAttribute("roughnessTexturePointer")) {
@@ -144,8 +150,6 @@ void PbrDrawable::setMaterialValuesInternal(
   if (materialData_->isDoubleSided()) {
     flags_ |= PbrShader::Flag::DoubleSided;
   }
-
-  std::string debugStr = "";
   ////////////////
   // ClearCoat layer
   if (materialData_->hasLayer(Mn::Trade::MaterialLayer::ClearCoat)) {
@@ -163,22 +167,24 @@ void PbrDrawable::setMaterialValuesInternal(
         flags_ |= PbrShader::Flag::CCLayer_CCTexture;
         matCache.cc_ClearCoatTexture =
             ccLayer.attribute<Mn::GL::Texture2D*>("layerFactorTexturePointer");
+        matCache.cc_ClearCoatTexture_Swizzle =
+            ccLayer.layerFactorTextureSwizzle();
       }
 
       if (ccLayer.hasAttribute("roughnessTexturePointer")) {
         flags_ |= PbrShader::Flag::CCLayer_RoughnessTexture;
         matCache.cc_RoughnessTexture =
             ccLayer.attribute<Mn::GL::Texture2D*>("roughnessTexturePointer");
-        matCache.cc_Roughness_Texture_Swizzle =
+        matCache.cc_RoughnessTexture_Swizzle =
             ccLayer.roughnessTextureSwizzle();
       }
-
       if (ccLayer.hasAttribute("normalTexturePointer")) {
         flags_ |= PbrShader::Flag::CCLayer_NormalTexture;
         matCache.cc_NormalTexture =
             ccLayer.attribute<Mn::GL::Texture2D*>("normalTexturePointer");
-        // TODO : do we really need to verify if scale
+
         matCache.cc_NormalTextureScale = ccLayer.normalTextureScale();
+        matCache.cc_NormalTexture_Swizzle = ccLayer.normalTextureSwizzle();
       }
       Cr::Utility::formatInto(
           debugStr, debugStr.size(),
