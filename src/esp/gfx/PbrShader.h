@@ -157,7 +157,7 @@ class PbrShader : public Magnum::GL::AbstractShaderProgram {
     TextureTransformation = 1 << 9,
 
     /**
-     * TODO: Do we need instanced object? (instanced texture, istanced id etc.)
+     * TODO: Do we need instanced object? (instanced texture, instanced id etc.)
      */
 
     /**
@@ -190,7 +190,8 @@ class PbrShader : public Magnum::GL::AbstractShaderProgram {
      * Has ClearCoat layer.
      */
     ClearCoatLayer = 1 << 13,
-
+    // TODO : possibly break out each layer's flags to a separate flags state
+    // machine?
     /**
      * Has ClearCoat Texture in ClearCoat layer
      */
@@ -210,6 +211,8 @@ class PbrShader : public Magnum::GL::AbstractShaderProgram {
      * Has KHR_materials_specular layer
      */
     SpecularLayer = 1 << 18,
+    // TODO : possibly break out each layer's flags to a separate flags state
+    // machine?
 
     /**
      * Has Specular Texture in KHR_materials_specular layer
@@ -225,6 +228,8 @@ class PbrShader : public Magnum::GL::AbstractShaderProgram {
      * Has KHR_materials_transmission layer
      */
     TransmissionLayer = 1 << 21,
+    // TODO : possibly break out each layer's flags to a separate flags state
+    // machine?
 
     /**
      * Has transmission texture in KHR_materials_transmission layer
@@ -235,6 +240,8 @@ class PbrShader : public Magnum::GL::AbstractShaderProgram {
      * Has KHR_materials_volume layer
      */
     VolumeLayer = 1 << 23,
+    // TODO : possibly break out each layer's flags to a separate flags state
+    // machine?
 
     /**
      * Has Thickness texture in  KHR_materials_volume layer
