@@ -130,7 +130,11 @@ PbrShader::PbrShader(Flags originalFlags, unsigned int lightCount)
                      ? "#define NORMAL_TEXTURE_SCALE\n"
                      : "")
       .addSource(flags_ & Flag::ObjectId ? "#define OBJECT_ID\n" : "")
+      // Clearcoat layer
       .addSource(flags_ & Flag::ClearCoatLayer ? "#define CLEAR_COAT\n" : "")
+      // Specular Layer
+      .addSource(flags_ & Flag::SpecularLayer ? "#define SPECULAR_LAYER\n" : "")
+
       .addSource(flags_ & Flag::PrecomputedTangent
                      ? "#define PRECOMPUTED_TANGENT\n"
                      : "")

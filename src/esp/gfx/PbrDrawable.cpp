@@ -179,115 +179,119 @@ void PbrDrawable::setMaterialValuesInternal(
 
   ////////////////
   // KHR_materials_ior
-  if (materialData_->hasLayer("#KHR_materials_ior")) {
+  if (const Cr::Containers::Optional<Mn::UnsignedInt> iorLayerID =
+          materialData_->findLayerId("#KHR_materials_ior")) {
     // Read in custom material index of refraction
-    if (materialData_->hasAttribute("#KHR_materials_ior", "ior")) {
-      matCache.ior_Index =
-          materialData_->attribute<float>("#KHR_materials_ior", "ior");
+    if (const Cr::Containers::Optional<Mn::Float> ior =
+            materialData_->findAttribute<Mn::Float>(*iorLayerID, "ior")) {
+      matCache.ior_Index = *ior;
     }
 
   }  // has KHR_materials_ior layer
 
   ////////////////
   // KHR_materials_specular layer
-  if (materialData_->hasLayer("#KHR_materials_specular")) {
+  if (const Cr::Containers::Optional<Mn::UnsignedInt> specularLayerID =
+          materialData_->findLayerId("#KHR_materials_specular")) {
     flags_ |= PbrShader::Flag::SpecularLayer;
     /**
      * The strength of the specular reflection. Defaults to 1.0f
      */
-    if (materialData_->hasAttribute("#KHR_materials_specular",
-                                    "specularFactor")) {
-      matCache.specularLayer.factor = materialData_->attribute<float>(
-          "#KHR_materials_specular", "specularFactor");
+    if (const Cr::Containers::Optional<Mn::Float> specularFactor =
+            materialData_->findAttribute<Mn::Float>(*specularLayerID,
+                                                    "specularFactor")) {
+      matCache.specularLayer.factor = *specularFactor;
     }
 
     /**
-     * A texture that defines the strength of the specular reflection, stored in
-     * the alpha (A) channel. This will be multiplied by specularFactor.
+     * A texture that defines the strength of the specular
+     * reflection, stored in the alpha (A) channel. This will be
+     * multiplied by specularFactor.
      */
-    if (materialData_->hasAttribute("#KHR_materials_specular",
-                                    "specularTexturePointer")) {
+    if (const Cr::Containers::Optional<Mn::GL::Texture2D*>
+            specularFactorTexture =
+                materialData_->findAttribute<Mn::GL::Texture2D*>(
+                    *specularLayerID, "specularTexturePointer")) {
       flags_ |= PbrShader::Flag::SpecularLayerTexture;
-      matCache.specularLayer.texture =
-          materialData_->attribute<Mn::GL::Texture2D*>(
-              "#KHR_materials_specular", "specularTexturePointer");
+      matCache.specularLayer.texture = *specularFactorTexture;
     }
     /**
      * The F0 color of the specular reflection (linear RGB).
      */
-    if (materialData_->hasAttribute("#KHR_materials_specular",
-                                    "specularColorFactor")) {
-      matCache.specularLayer.colorFactor = materialData_->attribute<Mn::Color3>(
-          "#KHR_materials_specular", "specularColorFactor");
+    if (const Cr::Containers::Optional<Mn::Color3> specularColorFactor =
+            materialData_->findAttribute<Mn::Color3>(*specularLayerID,
+                                                     "specularColorFactor")) {
+      matCache.specularLayer.colorFactor = *specularColorFactor;
     }
     /**
-     * A texture that defines the F0 color of the specular reflection,
-     * stored in the RGB channels and encoded in sRGB. This texture will be
-     * multiplied by specularColorFactor.
+     * A texture that defines the F0 color of the specular
+     * reflection, stored in the RGB channels and encoded in
+     * sRGB. This texture will be multiplied by
+     * specularColorFactor.
      */
-    if (materialData_->hasAttribute("#KHR_materials_specular",
-                                    "specularColorTexturePointer")) {
+    if (const Cr::Containers::Optional<Mn::GL::Texture2D*>
+            specularColorTexture =
+                materialData_->findAttribute<Mn::GL::Texture2D*>(
+                    *specularLayerID, "specularColorTexturePointer")) {
       flags_ |= PbrShader::Flag::SpecularLayerColorTexture;
-      matCache.specularLayer.colorTexture =
-          materialData_->attribute<Mn::GL::Texture2D*>(
-              "#KHR_materials_specular", "specularColorTexturePointer");
+      matCache.specularLayer.colorTexture = *specularColorTexture;
     }
   }  // has KHR_materials_specular layer
 
   ////////////////
   // KHR_materials_transmission
-  if (materialData_->hasLayer("#KHR_materials_transmission")) {
+  if (const Cr::Containers::Optional<Mn::UnsignedInt> transmissionLayerID =
+          materialData_->findLayerId("#KHR_materials_transmission")) {
     flags_ |= PbrShader::Flag::TransmissionLayer;
     // transmissionFactor
-    if (materialData_->hasAttribute("#KHR_materials_transmission",
-                                    "transmissionFactor")) {
-      matCache.transmissionLayer.factor = materialData_->attribute<float>(
-          "#KHR_materials_transmission", "transmissionFactor");
+    if (const Cr::Containers::Optional<Mn::Float> transmissionFactor =
+            materialData_->findAttribute<Mn::Float>(*transmissionLayerID,
+                                                    "transmissionFactor")) {
+      matCache.transmissionLayer.factor = *transmissionFactor;
     }
     // transmissionTexturePointer
-
-    if (materialData_->hasAttribute("#KHR_materials_transmission",
-                                    "transmissionTexturePointer")) {
+    if (const Cr::Containers::Optional<Mn::GL::Texture2D*>
+            transmissionTexturePointer =
+                materialData_->findAttribute<Mn::GL::Texture2D*>(
+                    *transmissionLayerID, "transmissionTexturePointer")) {
       flags_ |= PbrShader::Flag::TransmissionLayerTexture;
-      matCache.transmissionLayer.texture =
-          materialData_->attribute<Mn::GL::Texture2D*>(
-              "#KHR_materials_transmission", "transmissionTexturePointer");
+      matCache.transmissionLayer.texture = *transmissionTexturePointer;
     }
   }  // has KHR_materials_transmission layer
+
   ////////////////
   // KHR_materials_volume
-  if (materialData_->hasLayer("#KHR_materials_volume")) {
+  if (const Cr::Containers::Optional<Mn::UnsignedInt> volumeLayerID =
+          materialData_->findLayerId("#KHR_materials_volume")) {
     flags_ |= PbrShader::Flag::VolumeLayer;
 
-    if (materialData_->hasAttribute("#KHR_materials_volume",
-                                    "thicknessFactor")) {
-      matCache.volumeLayer.thicknessFactor = materialData_->attribute<float>(
-          "#KHR_materials_volume", "thicknessFactor");
+    if (const Cr::Containers::Optional<Mn::Float> thicknessFactor =
+            materialData_->findAttribute<Mn::Float>(*volumeLayerID,
+                                                    "thicknessFactor")) {
+      matCache.volumeLayer.thicknessFactor = *thicknessFactor;
     }
 
-    if (materialData_->hasAttribute("#KHR_materials_volume",
-                                    "thicknessTexturePointer")) {
+    if (const Cr::Containers::Optional<Mn::GL::Texture2D*>
+            thicknessTexturePointer =
+                materialData_->findAttribute<Mn::GL::Texture2D*>(
+                    *volumeLayerID, "thicknessTexturePointer")) {
       flags_ |= PbrShader::Flag::VolumeLayerThicknessTexture;
-      matCache.volumeLayer.thicknessTexture =
-          materialData_->attribute<Mn::GL::Texture2D*>(
-              "#KHR_materials_volume", "thicknessTexturePointer");
+      matCache.volumeLayer.thicknessTexture = *thicknessTexturePointer;
     }
 
-    if (materialData_->hasAttribute("#KHR_materials_volume",
-                                    "attenuationDistance")) {
-      float attDist = materialData_->attribute<float>("#KHR_materials_volume",
-                                                      "attenuationDistance");
-      if (attDist > 0.0f) {
+    if (const Cr::Containers::Optional<Mn::Float> attDist =
+            materialData_->findAttribute<Mn::Float>(*volumeLayerID,
+                                                    "attenuationDistance")) {
+      if (*attDist > 0.0f) {
         // Can't be 0 or inf
-        matCache.volumeLayer.attenuationDist = attDist;
+        matCache.volumeLayer.attenuationDist = *attDist;
       }
     }
 
-    if (materialData_->hasAttribute("#KHR_materials_volume",
-                                    "attenuationColor")) {
-      matCache.volumeLayer.attenuationColor =
-          materialData_->attribute<Mn::Color3>("#KHR_materials_volume",
-                                               "attenuationColor");
+    if (const Cr::Containers::Optional<Mn::Color3> attenuationColor =
+            materialData_->findAttribute<Mn::Color3>(*volumeLayerID,
+                                                     "attenuationColor")) {
+      matCache.volumeLayer.attenuationColor = *attenuationColor;
     }
   }  // has KHR_materials_volume layer
 }  // PbrDrawable::setMaterialValuesInternal
