@@ -150,6 +150,9 @@ void PbrDrawable::setMaterialValuesInternal(
     const auto& ccLayer =
         materialData_->as<Mn::Trade::PbrClearCoatMaterialData>();
     float cc_LayerFactor = ccLayer.layerFactor();
+    // As per
+    // https://github.com/KhronosGroup/glTF/tree/main/extensions/2.0/Khronos/KHR_materials_clearcoat
+    // if layer is 0 entire layer is disabled/ignored.
     if (cc_LayerFactor > 0.0f) {
       // has non-trivial clearcoat layer
       flags_ |= PbrShader::Flag::ClearCoatLayer;
@@ -392,6 +395,24 @@ void PbrDrawable::draw(const Mn::Matrix4& transformationMatrix,
 
   if (flags_ & PbrShader::Flag::TextureTransformation) {
     shader_->setTextureMatrix(matCache.textureMatrix);
+  }
+
+  // clearcoat data
+
+  if (flags_ & PbrShader::Flag::ClearCoatLayer) {
+    (*shader_)
+        .setClearCoatFactor(matCache.clearCoat.factor)
+        .setClearCoatRoughness(matCache.clearCoat.roughnessFactor);
+    if (flags_ >= PbrShader::Flag::ClearCoatTexture) {
+      shader_->bindClearCoatFactorTexture(*matCache.clearCoat.texture);
+    }
+    if (flags_ >= PbrShader::Flag::ClearCoatRoughnessTexture) {
+      shader_->bindClearCoatRoughnessTexture(
+          *matCache.clearCoat.roughnessTexture);
+    }
+    if (flags_ >= PbrShader::Flag::ClearCoatNormalTexture) {
+      shader_->bindClearCoatNormalTexture(*matCache.clearCoat.normalTexture);
+    }
   }
 
   // setup image based lighting for the shader
