@@ -484,33 +484,28 @@ void main() {
   //https://github.com/KhronosGroup/glTF/tree/main/extensions/2.0/Khronos/KHR_materials_clearcoat
   fragmentColor = vec4(emissiveColor, 0.0);
 
-#if (LIGHT_COUNT > 0)
-  vec4 baseColor = Material.baseColor;
-
-  float perceivedRoughness = clamp(Material.roughness, 0.0, 1.0);
-
-  float metallic = clamp(Material.metallic, 0.0, 1.0);
 
   //TODO clear coat implementation
   float clearCoatStrength = 0.0f;
   float clearCoatPerceivedRoughness = 0.0;
   float clearCoatCoating_f0 = 0.4;
 
-
+#if (LIGHT_COUNT > 0)
+  vec4 baseColor = Material.baseColor;
 #if defined(BASECOLOR_TEXTURE)
   baseColor *= texture(BaseColorTexture, texCoord);
 #endif
 
+
+float perceivedRoughness = Material.roughness;
 #if defined(ROUGHNESS_TEXTURE) || defined(NONE_ROUGHNESS_METALLIC_TEXTURE)
   perceivedRoughness *= texture(MetallicRoughnessTexture, texCoord).g;
 #endif
-  // clamp to avoid div by zero ?
-  // perceivedRoughness = clamp(perceivedRoughness, 0.045, 1.0);
-
   // Roughness is authored as perceptual roughness by convention,
   // convert to more linear roughness mapping by squaring the perceptual roughness.
   float alphaRoughness = perceivedRoughness * perceivedRoughness;
 
+float metallic = Material.metallic;
 #if defined(METALLIC_TEXTURE) || defined(NONE_ROUGHNESS_METALLIC_TEXTURE)
   metallic *= texture(MetallicRoughnessTexture, texCoord).b;
 #endif
@@ -554,7 +549,7 @@ float clearCoatRoughness = clearCoatPerceivedRoughness * clearCoatPerceivedRough
   vec3 view = normalize(CameraWorldPos - position);
 
   // view projected on normal
-  float n_dot_v = dot(n, view);  /// + epsilon;
+  float n_dot_v = abs(dot(n, view));  /// + epsilon;
 
   vec3 diffuseContrib = vec3(0.0, 0.0, 0.0);
   vec3 specularContrib = vec3(0.0, 0.0, 0.0);
