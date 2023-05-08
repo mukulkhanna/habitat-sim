@@ -80,12 +80,12 @@ PbrShader::PbrShader(Flags originalFlags, unsigned int lightCount)
             (Flag::BaseColorTexture | Flag::RoughnessTexture |
              Flag::NoneRoughnessMetallicTexture | Flag::MetallicTexture |
              Flag::NormalTexture | Flag::EmissiveTexture))) ||
+      (flags_ >= (Flag::ClearCoatTexture | (Flag::ClearCoatRoughnessTexture |
+                                            Flag::ClearCoatNormalTexture))) ||
       (flags_ >=
-       (Flag::CCLayer_RoughnessTexture | Flag::CCLayer_NormalTexture)) ||
-      (flags_ >=
-       (Flag::SpecLayer_SpecTexture | Flag::SpecLayer_SpecColorTexture)) ||
-      (flags_ >= Flag::TransLayer_TransmissionTexture) ||
-      (flags_ >= Flag::VolLayer_ThicknessTexture);
+       (Flag::SpecularLayerTexture | Flag::SpecularLayerColorTexture)) ||
+      (flags_ >= Flag::TransmissionLayerTexture) ||
+      (flags_ >= Flag::VolumeLayerThicknessTexture);
 
   if (isTextured) {
     attributeLocationsStream
@@ -130,6 +130,7 @@ PbrShader::PbrShader(Flags originalFlags, unsigned int lightCount)
                      ? "#define NORMAL_TEXTURE_SCALE\n"
                      : "")
       .addSource(flags_ & Flag::ObjectId ? "#define OBJECT_ID\n" : "")
+      .addSource(flags_ & Flag::ClearCoatLayer ? "#define CLEAR_COAT\n" : "")
       .addSource(flags_ & Flag::PrecomputedTangent
                      ? "#define PRECOMPUTED_TANGENT\n"
                      : "")
