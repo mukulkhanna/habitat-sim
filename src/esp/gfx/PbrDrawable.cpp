@@ -57,13 +57,17 @@ void PbrDrawable::setMaterialValuesInternal(
   matCache.metalness = tmpMaterialData.metalness();
   matCache.emissiveColor = tmpMaterialData.emissiveColor();
 
-  if (materialData_->hasAttribute("metallicTexturePointer") &&
-      materialData_->hasAttribute("roughnessTexturePointer")) {
+  const Cr::Containers::Optional<Mn::GL::Texture2D*> metallicTexturePtr =
+      materialData_->findAttribute<Mn::GL::Texture2D*>(
+          "metallicTexturePointer");
+
+  const Cr::Containers::Optional<Mn::GL::Texture2D*> roughnessTexturePtr =
+      materialData_->findAttribute<Mn::GL::Texture2D*>(
+          "roughnessTexturePointer");
+
+  if (metallicTexturePtr && roughnessTexturePtr) {
     CORRADE_ASSERT(
-        materialData_->attribute<Mn::GL::Texture2D*>(
-            "metallicTexturePointer") ==
-            materialData_->attribute<Mn::GL::Texture2D*>(
-                "roughnessTexturePointer"),
+        *metallicTexturePtr == *roughnessTexturePtr,
         "PbrDrawable::setMaterialValuesInternal(): if both the metallic and "
         "roughness "
         "texture exist, they must be packed in the same texture based on glTF "
@@ -73,38 +77,38 @@ void PbrDrawable::setMaterialValuesInternal(
     flags_ |= PbrShader::Flag::TextureTransformation;
     matCache.textureMatrix = tmpMaterialData.commonTextureMatrix();
   }
-  if (materialData_->hasAttribute("baseColorTexturePointer")) {
+  if (const Cr::Containers::Optional<Mn::GL::Texture2D*> baseColorTexturePtr =
+          materialData_->findAttribute<Mn::GL::Texture2D*>(
+              "baseColorTexturePointer")) {
     flags_ |= PbrShader::Flag::BaseColorTexture;
-    matCache.baseColorTexture =
-        materialData_->attribute<Mn::GL::Texture2D*>("baseColorTexturePointer");
+    matCache.baseColorTexture = *baseColorTexturePtr;
   }
 
   matCache.hasAnyMetallicRoughnessTexture = false;
   matCache.useMetallicRoughnessTexture = nullptr;
   // noneRoughnessMetallic takes precedence, but currently all are
   // treated the same way
-  if (materialData_->hasAttribute("noneRoughnessMetallicTexturePointer")) {
+  if (const Cr::Containers::Optional<Mn::GL::Texture2D*>
+          noneRoughMetalTexturePtr =
+              materialData_->findAttribute<Mn::GL::Texture2D*>(
+                  "noneRoughnessMetallicTexturePointer")) {
     flags_ |= PbrShader::Flag::NoneRoughnessMetallicTexture;
-    matCache.noneRoughnessMetallicTexture =
-        materialData_->attribute<Mn::GL::Texture2D*>(
-            "noneRoughnessMetallicTexturePointer");
+    matCache.noneRoughnessMetallicTexture = *noneRoughMetalTexturePtr;
     matCache.hasAnyMetallicRoughnessTexture = true;
     matCache.useMetallicRoughnessTexture =
         matCache.noneRoughnessMetallicTexture;
   }
-  if (materialData_->hasAttribute("roughnessTexturePointer")) {
+  if (roughnessTexturePtr) {
     flags_ |= PbrShader::Flag::RoughnessTexture;
-    matCache.roughnessTexture =
-        materialData_->attribute<Mn::GL::Texture2D*>("roughnessTexturePointer");
+    matCache.roughnessTexture = *roughnessTexturePtr;
     if (!matCache.hasAnyMetallicRoughnessTexture) {
       matCache.useMetallicRoughnessTexture = matCache.roughnessTexture;
     }
     matCache.hasAnyMetallicRoughnessTexture = true;
   }
-  if (materialData_->hasAttribute("metallicTexturePointer")) {
+  if (metallicTexturePtr) {
     flags_ |= PbrShader::Flag::MetallicTexture;
-    matCache.metallicTexture =
-        materialData_->attribute<Mn::GL::Texture2D*>("metallicTexturePointer");
+    matCache.metallicTexture = *metallicTexturePtr;
 
     if (!matCache.hasAnyMetallicRoughnessTexture) {
       matCache.useMetallicRoughnessTexture = matCache.metallicTexture;
@@ -118,10 +122,11 @@ void PbrDrawable::setMaterialValuesInternal(
                  "proper Metallic/Roughness texture pointers - either a "
                  "texture is expected but not present or vice versa.", );
 
-  if (materialData_->hasAttribute("normalTexturePointer")) {
+  if (const Cr::Containers::Optional<Mn::GL::Texture2D*> normalTexturePtr =
+          materialData_->findAttribute<Mn::GL::Texture2D*>(
+              "normalTexturePointer")) {
     flags_ |= PbrShader::Flag::NormalTexture;
-    matCache.normalTexture =
-        materialData_->attribute<Mn::GL::Texture2D*>("normalTexturePointer");
+    matCache.normalTexture = *normalTexturePtr;
     if (meshAttributeFlags_ & gfx::Drawable::Flag::HasTangent) {
       flags_ |= PbrShader::Flag::PrecomputedTangent;
     }
@@ -133,10 +138,12 @@ void PbrDrawable::setMaterialValuesInternal(
                      "must be positive.", );
     }
   }
-  if (materialData_->hasAttribute("emissiveTexturePointer")) {
+
+  if (const Cr::Containers::Optional<Mn::GL::Texture2D*> emissiveTexturePtr =
+          materialData_->findAttribute<Mn::GL::Texture2D*>(
+              "emissiveTexturePointer")) {
     flags_ |= PbrShader::Flag::EmissiveTexture;
-    matCache.emissiveTexture =
-        materialData_->attribute<Mn::GL::Texture2D*>("emissiveTexturePointer");
+    matCache.emissiveTexture = *emissiveTexturePtr;
   }
   if (materialData_->attribute<bool>("hasPerVertexObjectId")) {
     flags_ |= PbrShader::Flag::InstancedObjectId;
@@ -159,22 +166,26 @@ void PbrDrawable::setMaterialValuesInternal(
       //
       matCache.clearCoat.factor = cc_LayerFactor;
       matCache.clearCoat.roughnessFactor = ccLayer.roughness();
-
-      if (ccLayer.hasAttribute("layerFactorTexturePointer")) {
+      if (const Cr::Containers::Optional<Mn::GL::Texture2D*> layerTexturePtr =
+              ccLayer.findAttribute<Mn::GL::Texture2D*>(
+                  "layerFactorTexturePointer")) {
         flags_ |= PbrShader::Flag::ClearCoatTexture;
-        matCache.clearCoat.texture =
-            ccLayer.attribute<Mn::GL::Texture2D*>("layerFactorTexturePointer");
+        matCache.clearCoat.texture = *layerTexturePtr;
       }
 
-      if (ccLayer.hasAttribute("roughnessTexturePointer")) {
+      if (const Cr::Containers::Optional<Mn::GL::Texture2D*>
+              roughnessTexturePtr = ccLayer.findAttribute<Mn::GL::Texture2D*>(
+                  "roughnessTexturePointer")) {
         flags_ |= PbrShader::Flag::ClearCoatRoughnessTexture;
-        matCache.clearCoat.roughnessTexture =
-            ccLayer.attribute<Mn::GL::Texture2D*>("roughnessTexturePointer");
+        matCache.clearCoat.roughnessTexture = *roughnessTexturePtr;
       }
-      if (ccLayer.hasAttribute("normalTexturePointer")) {
+
+      if (const Cr::Containers::Optional<Mn::GL::Texture2D*> normalTexturePtr =
+              ccLayer.findAttribute<Mn::GL::Texture2D*>(
+                  "normalTexturePointer")) {
         flags_ |= PbrShader::Flag::ClearCoatNormalTexture;
-        matCache.clearCoat.normalTexture =
-            ccLayer.attribute<Mn::GL::Texture2D*>("normalTexturePointer");
+        matCache.clearCoat.normalTexture = *normalTexturePtr;
+        matCache.clearCoat.normalTextureScale = ccLayer.normalTextureScale();
       }
 
     }  // non-zero layer factor
@@ -402,7 +413,8 @@ void PbrDrawable::draw(const Mn::Matrix4& transformationMatrix,
   if (flags_ & PbrShader::Flag::ClearCoatLayer) {
     (*shader_)
         .setClearCoatFactor(matCache.clearCoat.factor)
-        .setClearCoatRoughness(matCache.clearCoat.roughnessFactor);
+        .setClearCoatRoughness(matCache.clearCoat.roughnessFactor)
+        .setClearCoatNormalTextureScale(matCache.clearCoat.normalTextureScale);
     if (flags_ >= PbrShader::Flag::ClearCoatTexture) {
       shader_->bindClearCoatFactorTexture(*matCache.clearCoat.texture);
     }
@@ -412,6 +424,21 @@ void PbrDrawable::draw(const Mn::Matrix4& transformationMatrix,
     }
     if (flags_ >= PbrShader::Flag::ClearCoatNormalTexture) {
       shader_->bindClearCoatNormalTexture(*matCache.clearCoat.normalTexture);
+    }
+  }
+
+  // specular layer data
+  if (flags_ & PbrShader::Flag::SpecularLayer) {
+    (*shader_)
+        .setSpecularLayerFactor(matCache.specularLayer.factor)
+        .setSpecularLayerColorFactor(matCache.specularLayer.colorFactor);
+
+    if (flags_ >= PbrShader::Flag::SpecularLayerTexture) {
+      shader_->bindSpecularLayerTexture(*matCache.specularLayer.texture);
+    }
+    if (flags_ >= PbrShader::Flag::SpecularLayerColorTexture) {
+      shader_->bindSpecularLayerColorTexture(
+          *matCache.specularLayer.colorTexture);
     }
   }
 

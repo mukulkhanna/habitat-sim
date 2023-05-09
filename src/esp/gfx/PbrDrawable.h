@@ -80,6 +80,11 @@ class PbrDrawable : public Drawable {
       Mn::GL::Texture2D* roughnessTexture = nullptr;
 
       /**
+       * Scale value for clearcoat normal texture
+       */
+      float normalTextureScale = 1.0f;
+
+      /**
        * Clearcoat Normal map texture, in RGB channels.
        */
       Mn::GL::Texture2D* normalTexture = nullptr;
